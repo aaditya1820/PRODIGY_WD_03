@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic-Tac-Toe vs AI</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 10px;
+    }
+
+    .cell {
+      background-color: white;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s ease;
+    }
+
+    .cell:hover {
+      background-color: #f1f1f1;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 1.3rem;
+      color: #fff;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #fff;
+      color: #333;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+
+    @media (max-width: 500px) {
+      #game-board {
+        grid-template-columns: repeat(3, 80px);
+        grid-template-rows: repeat(3, 80px);
+        gap: 8px;
+      }
+
+      .cell {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1> Tic-Tac-Toe Game</h1>
+  <div id="game-board"></div>
+  <div id="status">Your turn (X)</div>
+  <button onclick="restartGame()"> Restart</button>
+
+  <script>
+    const board = document.getElementById('game-board');
+    const status = document.getElementById('status');
+    let gameState = Array(9).fill('');
+    let isGameOver = false;
+
+    const winningCombos = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    function renderBoard() {
+      board.innerHTML = '';
+      gameState.forEach((val, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = val;
+        cell.addEventListener('click', () => handlePlayerMove(index));
+        board.appendChild(cell);
+      });
+    }
+
+    function handlePlayerMove(index) {
+      if (gameState[index] || isGameOver) return;
+
+      gameState[index] = 'X';
+      renderBoard();
+      if (checkWinner('X')) {
+        status.textContent = " You win!";
+        isGameOver = true;
+        return;
+      } else if (isDraw()) {
+        status.textContent = " It's a draw!";
+        isGameOver = true;
+        return;
+      }
+
+      status.textContent = "AI's turn...";
+      setTimeout(aiMove, 500); 
+    }
+
+    function aiMove() {
+      const emptyIndices = gameState.map((val, idx) => val === '' ? idx : null).filter(i => i !== null);
+      if (emptyIndices.length === 0) return;
+
+      const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      gameState[move] = 'O';
+      renderBoard();
+
+      if (checkWinner('O')) {
+        status.textContent = " AI wins!";
+        isGameOver = true;
+      } else if (isDraw()) {
+        status.textContent = "It's a draw!";
+        isGameOver = true;
+      } else {
+        status.textContent = "Your turn (X)";
+      }
+    }
+
+    function checkWinner(player) {
+      return winningCombos.some(combo => 
+        combo.every(index => gameState[index] === player)
+      );
+    }
+
+    function isDraw() {
+      return gameState.every(cell => cell !== '');
+    }
+
+    function restartGame() {
+      gameState = Array(9).fill('');
+      isGameOver = false;
+      status.textContent = "Your turn (X)";
+      renderBoard();
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
